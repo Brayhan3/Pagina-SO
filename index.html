@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> Inventario del Grupo#1 </title>
+    <style>
+        body { font-family: sans-serif; background: #f4f4f4; text-align: center; }
+        .container { background: white; margin: 50px auto; padding: 20px; width: 50%; border-radius: 10px; shadow: 0 0 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #ddd; }
+        th { background: #333; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1> Inventario del Grupo#1</h1>
+        <p>Carga la página para ver los datos actuales:</p>
+        <div id="datos"></div>
+    </div>
+    <script>
+        // Un pequeño script para traer los datos de la base de datos
+        fetch('/api/productos')
+            .then(res => res.json())
+            .then(data => {
+                let html = '<table><tr><th>Producto</th><th>Cant.</th></tr>';
+                data.forEach(p => {
+                    html += `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`;
+                });
+                html += '</table>';
+                document.getElementById('datos').innerHTML = html;
+            });
+    </script>
+</body>
+</html>
