@@ -1,33 +1,76 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title> Inventario del Grupo#1 </title>
+    <meta charset="UTF-8">
+    <title>Inventario Grupo #1</title>
     <style>
-        body { font-family: sans-serif; background: #f4f4f4; text-align: center; }
-        .container { background: white; margin: 50px auto; padding: 20px; width: 50%; border-radius: 10px; shadow: 0 0 10px rgba(0,0,0,0.1); }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 10px; border-bottom: 1px solid #ddd; }
-        th { background: #333; color: white; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; text-align: center; padding: 20px; }
+        .container { background: white; margin: auto; padding: 30px; width: 90%; max-width: 500px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        input { width: 80%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; }
+        button { padding: 10px 25px; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        table { width: 100%; margin-top: 30px; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; }
+        th { background: #007bff; color: white; }
     </style>
 </head>
 <body>
+
     <div class="container">
-        <h1> Inventario del Grupo#1</h1>
-        <p>Carga la página para ver los datos actuales:</p>
-        <div id="datos"></div>
+        <h1>📦 Inventario Grupo #1</h1>
+        
+        <input type="text" id="nombre" placeholder="Nombre del producto">
+        <input type="number" id="cantidad" placeholder="Cantidad">
+        <button onclick="agregar()">Agregar a la Base</button>
+
+        <hr style="margin: 30px 0;">
+
+        <div id="tabla-contenedor">Cargando datos...</div>
     </div>
+
     <script>
-        // Un pequeño script para traer los datos de la base de datos
-        fetch('/api/productos')
-            .then(res => res.json())
-            .then(data => {
-                let html = '<table><tr><th>Producto</th><th>Cant.</th></tr>';
-                data.forEach(p => {
-                    html += `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`;
+        // Función para traer datos de la DB y dibujarlos en la tabla
+        function cargarTabla() {
+            fetch('/api/productos')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.length === 0) {
+                        document.getElementById('tabla-contenedor').innerHTML = "<p>No hay productos registrados.</p>";
+                        return;
+                    }
+                    let html = '<table><tr><th>Producto</th><th>Cant.</th></tr>';
+                    data.forEach(p => {
+                        html += `<tr><td>${p.nombre}</td><td>${p.cantidad}</td></tr>`;
+                    });
+                    html += '</table>';
+                    document.getElementById('tabla-contenedor').innerHTML = html;
                 });
-                html += '</table>';
-                document.getElementById('datos').innerHTML = html;
-            });
+        }
+
+        // Función para enviar datos al servidor
+        function agregar() {
+            const n = document.getElementById('nombre').value;
+            const c = document.getElementById('cantidad').value;
+
+            if (!n || !c) return alert("Por favor llena los campos");
+
+            fetch('/agregar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: n, cantidad: c })
+            })
+            .then(res => res.text())
+            .then(data => {
+                console.log(data);
+                document.getElementById('nombre').value = '';
+                document.getElementById('cantidad').value = '';
+                cargarTabla(); // Refresca la tabla sin recargar la página entera
+            })
+            .catch(err => alert("Error al conectar con el servidor"));
+        }
+
+        // Carga inicial
+        window.onload = cargarTabla;
     </script>
 </body>
 </html>
